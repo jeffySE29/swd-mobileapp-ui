@@ -1,14 +1,40 @@
 import 'package:flutter/material.dart';
-
-import 'pages/home_page.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:provider/provider.dart';
 import 'pages/login_page.dart';
-import 'pages/menu_page.dart';
-import 'pages/order_list.dart';
-import 'pages/order_page.dart';
-import 'pages/profile_page.dart';
+import 'network_services/network_monitor.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print('A background message just showed up: ${message.messageId}');
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: "AIzaSyAUG9ufw5az3TJDkJD-fb0jmMPgdoaumos",
+        appId: "1:306142775890:android:ed6beee59b6af49eafed8b",
+        messagingSenderId: "306142775890",
+        projectId: "swd-quannhaurestaurant-se2024",
+        storageBucket: "swd-quannhaurestaurant-se2024.appspot.com",
+      ),
+    );
+    print('Firebase initialized successfully');
+  } catch (e) {
+    print('Error initializing Firebase: $e');
+  }
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => NetworkMonitor(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -20,31 +46,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: const LoginPage(),
       onGenerateRoute: (settings) {
-        if (settings.name == '/home_page') {
-          final args = settings.arguments as Map<String, String>;
-          return MaterialPageRoute(
-            builder: (context) {
-              return HomePage(
-                username: args['username']!,
-                token: args['token']!,
-              );
-            },
-          );
-        }
-
-        // Handle other routes here
         switch (settings.name) {
           case '/login_page':
             return MaterialPageRoute(builder: (context) => const LoginPage());
-          case '/order_page':
-            return MaterialPageRoute(builder: (context) => const OrderPage());
-          case '/order_list_page':
-            return MaterialPageRoute(
-                builder: (context) => const OrderListPage());
-          case '/profile_page':
-            return MaterialPageRoute(builder: (context) => const ProfilePage());
-          case '/menu_page':
-            return MaterialPageRoute(builder: (context) => const MenuPage());
           default:
             return MaterialPageRoute(builder: (context) => const LoginPage());
         }

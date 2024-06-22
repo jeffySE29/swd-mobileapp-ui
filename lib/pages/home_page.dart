@@ -1,88 +1,64 @@
 import 'package:flutter/material.dart';
-import 'menu_page.dart';
+import 'notification_page.dart';
 import 'order_page.dart';
-import 'order_list.dart';
+import 'order_list_page.dart';
 import 'profile_page.dart';
+import '../datas/user_data.dart';
 
 class HomePage extends StatefulWidget {
-  final String username;
-  final String token;
+  final User user; // User data
 
-  const HomePage({super.key, required this.username, required this.token});
+  const HomePage({Key? key, required this.user}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  //this keep track of current page to display;
   int _selectedIndex = 0;
 
-  //now we create a method to change _selectedIndex
   void _navigateBottomBar(int index) {
-    //bth demo stateless nhung ma minh lam
-    //method nay nen can chuyen sang stateful dang stateless bam ctrl . thi no se hien goi y convert to stateful
     setState(() {
       _selectedIndex = index;
     });
   }
 
-  final List _pages = [
-    const OrderPage(),
-    const OrderListPage(),
-    const MenuPage(),
-    const ProfilePage(),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _pages = [
+      const OrderPage(),
+      const OrderListPage(),
+      NotificationPage(user: widget.user),
+      ProfilePage(user: widget.user), // Pass user data to ProfilePage
+    ];
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue[100],
-        title: Center(
-          child: Text(
-            "Welcome, ${widget.username}",
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-      //bottom navigator bar
-      //body of this section
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _navigateBottomBar,
         items: const [
-          //Order
           BottomNavigationBarItem(
             icon: Icon(Icons.list_alt),
-            label: 'Order',
+            label: '',
           ),
-
-          //Order List
           BottomNavigationBarItem(
             icon: Icon(Icons.blinds_closed_outlined),
-            label: 'Order List',
+            label: '',
           ),
-
-          //Menu
           BottomNavigationBarItem(
-            icon: Icon(Icons.menu_book),
-            label: 'Menu',
+            icon: Icon(Icons.notifications),
+            label: '',
           ),
-
-          //Profile
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Profile',
+            label: '',
           ),
         ],
-        selectedItemColor: Colors.blue, // Màu sắc khi mục được chọn
-        unselectedItemColor: Colors.grey, // Màu sắc khi mục không được chọn
-        backgroundColor:
-            Colors.white, // Màu nền cho toàn bộ BottomNavigationBar
-        type: BottomNavigationBarType
-            .fixed, // Đảm bảo các mục không thay đổi vị trí
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        backgroundColor: Colors.white,
+        type: BottomNavigationBarType.fixed,
       ),
     );
   }
