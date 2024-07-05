@@ -1,48 +1,116 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:another_flushbar/flushbar.dart';
+import 'package:http/http.dart' as http;
+import '../datas/auth_service.dart';
+import '../datas/table_list.dart';
 
-class TableListPage extends StatefulWidget {
-  final ValueChanged<int> onSelected;
+class TableModel {
+  final String id;
+  final String code;
+  final String areaId;
+  final String name;
+  final String description;
+  final String status;
+  final bool deleted;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
-  const TableListPage({super.key, required this.onSelected});
+  TableModel({
+    required this.id,
+    required this.code,
+    required this.areaId,
+    required this.name,
+    required this.description,
+    required this.status,
+    required this.deleted,
+    required this.createdAt,
+    required this.updatedAt,
+  });
 
-  @override
-  _TableListState createState() => _TableListState();
+  factory TableModel.fromJson(Map<String, dynamic> json) {
+    return TableModel(
+      id: json['id'],
+      code: json['code'],
+      areaId: json['areaId'],
+      name: json['name'],
+      description: json['description'],
+      status: json['status'],
+      deleted: json['deleted'],
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
+    );
+  }
 }
 
-class _TableListState extends State<TableListPage> {
-  // Dữ liệu key-value
-  final Map<int, String> _keyValuePairs = {
-    1: 'Giá trị 1',
-    2: 'Giá trị 2',
-    3: 'Giá trị 3',
-    4: 'Giá trị 4',
-  };
+class AreaModel {
+  final String name;
+  final List<TableModel> tables;
 
-  late int _selectedKey;
+  AreaModel({
+    required this.name,
+    required this.tables,
+  });
 
-  @override
-  void initState() {
-    super.initState();
-    // Đặt giá trị mặc định
-    _selectedKey = _keyValuePairs.keys.first;
+  factory AreaModel.fromJson(String name, List<dynamic> jsonList) {
+    List<TableModel> tables =
+        jsonList.map((data) => TableModel.fromJson(data)).toList();
+    return AreaModel(name: name, tables: tables);
   }
+}
 
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButton<int>(
-      value: _selectedKey,
-      items: _keyValuePairs.entries.map((entry) {
-        return DropdownMenuItem<int>(
-          value: entry.key,
-          child: Text(entry.value),
+class AreaTable {
+  final String baseUrl = "https://quannhauserver.xyz/api/areas/detail/";
+
+  Future<List<AreaModel>> fetchAreas() async {
+    try {
+      String? token = await AuthService.getToken();
+      if (token == null) {
+        String? newToken = await AuthService.refreshToken();
+        if (newToken == null ||
+            newToken == "" ||
+            newToken == "Refresh failed") {
+          throw Exception("Error when fetch area table");
+        } else {
+          final response = await http.get(
+            Uri.parse(baseUrl),
+            headers: {
+              'Authorization': '$newToken',
+            },
+          );
+          if (response.statusCode == 200) {
+            Map<String, dynamic> data = json.decode(response.body)['data'];
+            List<AreaModel> areas = [];
+
+            data.forEach((areaName, tables) {
+              areas.add(AreaModel.fromJson(areaName, tables));
+            });
+            return areas;
+          } else {
+            throw Exception('Failed to load areas');
+          }
+        }
+      } else {
+        final response = await http.get(
+          Uri.parse(baseUrl),
+          headers: {
+            'Authorization': '$token',
+          },
         );
-      }).toList(),
-      onChanged: (newValue) {
-        setState(() {
-          _selectedKey = newValue!;
-          widget.onSelected(_selectedKey); // Gọi callback khi giá trị thay đổi
-        });
-      },
-    );
+        if (response.statusCode == 200) {
+          Map<String, dynamic> data = json.decode(response.body)['data'];
+          List<AreaModel> areas = [];
+
+          data.forEach((areaName, tables) {
+            areas.add(AreaModel.fromJson(areaName, tables));
+          });
+          return areas;
+        } else {
+          throw Exception('Failed to load areas');
+        }
+      }
+    } catch (e) {
+      throw Exception("Failed to fetch areas: $e");
+    }
   }
 }

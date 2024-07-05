@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import '../datas/table_list.dart';
 import 'package:another_flushbar/flushbar.dart';
-// Sử dụng dữ liệu từ file table_list.dart
 
 class OrderPage extends StatefulWidget {
-  const OrderPage({super.key});
+  const OrderPage({Key? key}) : super(key: key);
 
   @override
   State<OrderPage> createState() => _OrderPageState();
@@ -11,55 +11,63 @@ class OrderPage extends StatefulWidget {
 
 class _OrderPageState extends State<OrderPage> {
   final TextEditingController _phoneController = TextEditingController();
-  bool _isButtonEnabled = false;
   int _amountPeople = 1;
-
-  final RegExp phoneNumberRegex = RegExp(r'^\d{10}$');
 
   int? _selectedTable;
   String? _selectedArea;
-
-  List<String> areas = ['Area 1', 'Area 2', 'Area 3']; // Dữ liệu mẫu cho Area
-  List<String> tables = [
-    'Table 1',
-    'Table 2',
-    'Table 3',
-    'Table 4',
-    'Table 5',
-    'Table 6',
-    'Table 7',
-    'Table 8',
-    'Table 9',
-    'Table 10'
-  ]; // Dữ liệu mẫu cho Table
+  List<AreaModel> _areas = [];
+  List<TableModel> _tables = [];
 
   @override
   void initState() {
     super.initState();
-    _phoneController.addListener(_onPhoneChanged);
+    _fetchAreas();
   }
 
-  void _onPhoneChanged() {
+  Future<void> _fetchAreas() async {
+    try {
+      AreaTable areaTable = AreaTable();
+      List<AreaModel> areas = await areaTable.fetchAreas();
+      setState(() {
+        _areas = areas;
+        if (_areas.isNotEmpty) {
+          _selectedArea = _areas[0].name;
+          _tables = _areas[0].tables;
+        }
+      });
+    } catch (e) {
+      print('Error fetching areas: $e');
+    }
+  }
+
+  void _onAreaSelected(String areaName) {
     setState(() {
-      _isButtonEnabled = _phoneController.text.isNotEmpty;
+      _selectedArea = areaName;
+      _tables = _areas.firstWhere((area) => area.name == areaName).tables;
+      _selectedTable = null;
     });
   }
 
-  void _createOrder() {
-    final String phoneNumber = _phoneController.text;
-    if (phoneNumber.isNotEmpty &&
-        phoneNumberRegex.hasMatch(phoneNumber.trim()) &&
-        _selectedTable != null &&
-        _selectedArea != null) {
+  void _createOrder() async {
+    try {
+      if (_selectedTable != null &&
+          _selectedArea != null &&
+          _amountPeople > 0) {
+        Flushbar(
+          message: "Order created successfully!",
+          backgroundColor: const Color.fromARGB(255, 112, 217, 119),
+          duration: const Duration(seconds: 3),
+        ).show(context);
+      } else {
+        Flushbar(
+          message: "Missing field!",
+          backgroundColor: const Color.fromARGB(255, 241, 45, 31),
+          duration: const Duration(seconds: 3),
+        ).show(context);
+      }
+    } catch (e) {
       Flushbar(
-        message:
-            "Create order success for $_selectedArea - $_selectedTable with phone number $phoneNumber and $_amountPeople people",
-        backgroundColor: const Color.fromARGB(255, 112, 217, 119),
-        duration: const Duration(seconds: 3),
-      ).show(context);
-    } else {
-      Flushbar(
-        message: 'Please fill all required fields correctly.',
+        message: "Error when creating order: $e",
         backgroundColor: const Color.fromARGB(255, 241, 45, 31),
         duration: const Duration(seconds: 3),
       ).show(context);
@@ -80,29 +88,27 @@ class _OrderPageState extends State<OrderPage> {
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
             maxCrossAxisExtent: 120,
-            mainAxisExtent: 60, // Halve the height of the grid items
+            mainAxisExtent: 60,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
           ),
-          itemCount: areas.length,
+          itemCount: _areas.length,
           itemBuilder: (BuildContext context, int index) {
             return GestureDetector(
               onTap: () {
-                setState(() {
-                  _selectedArea = areas[index];
-                });
+                _onAreaSelected(_areas[index].name);
               },
               child: Container(
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8.0),
-                  color: _selectedArea == areas[index]
-                      ? Colors.blue[100]
-                      : Colors.grey[300],
+                  color: _selectedArea == _areas[index].name
+                      ? Colors.grey[300] // Selected color
+                      : Colors.teal[100], // Default color
                 ),
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  areas[index],
+                  _areas[index].name,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -128,29 +134,33 @@ class _OrderPageState extends State<OrderPage> {
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
             maxCrossAxisExtent: 120,
-            mainAxisExtent: 60, // Halve the height of the grid items
+            mainAxisExtent: 60,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
           ),
-          itemCount: tables.length,
+          itemCount: _tables.length,
           itemBuilder: (BuildContext context, int index) {
             return GestureDetector(
               onTap: () {
-                setState(() {
-                  _selectedTable = index + 1; // Index + 1 for table number
-                });
+                if (_tables[index].status == 'available') {
+                  setState(() {
+                    _selectedTable = index + 1; // Index + 1 for table number
+                  });
+                }
               },
               child: Container(
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8.0),
                   color: _selectedTable == index + 1
-                      ? Colors.blue[100]
-                      : Colors.grey[300],
+                      ? Colors.grey[300] // Selected color
+                      : _tables[index].status == 'available'
+                          ? Colors.teal[100] // Available color
+                          : Colors.yellow[100], // Not available color
                 ),
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  tables[index],
+                  _tables[index].code, // Displaying code on the table button
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -185,12 +195,12 @@ class _OrderPageState extends State<OrderPage> {
                   },
                   icon: const Icon(Icons.remove_circle_outline),
                 ),
-                const SizedBox(width: 5), // Add a 5px gap
+                const SizedBox(width: 5),
                 Text(
                   _amountPeople.toString(),
                   style: const TextStyle(fontSize: 18.0),
                 ),
-                const SizedBox(width: 5), // Add a 5px gap
+                const SizedBox(width: 5),
                 IconButton(
                   onPressed: () {
                     setState(() {
@@ -215,6 +225,8 @@ class _OrderPageState extends State<OrderPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool _isButtonEnabled = _selectedTable != null && _selectedArea != null;
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -245,7 +257,7 @@ class _OrderPageState extends State<OrderPage> {
             ),
             const SizedBox(height: 8.0),
             Text(
-              'Table: ${_selectedTable != null ? "Table $_selectedTable" : "None"}',
+              'Table: ${_selectedTable != null ? _tables[_selectedTable! - 1].code : "None"}',
               style: const TextStyle(fontSize: 16.0),
             ),
             const SizedBox(height: 8.0),
@@ -261,11 +273,12 @@ class _OrderPageState extends State<OrderPage> {
                   minimumSize: WidgetStateProperty.all<Size>(
                     const Size(250, 50),
                   ), // Set the minimum width and height of the button
-                  backgroundColor:
-                      WidgetStateProperty.all<Color>(Colors.teal[100]!),
-                  foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
-                  overlayColor: WidgetStateProperty.all<Color>(
-                      Colors.blue[100]!.withOpacity(0.1)),
+                  backgroundColor: WidgetStateProperty.all<Color>(
+                      Colors.teal[100]!), // Màu nền
+                  foregroundColor:
+                      WidgetStateProperty.all<Color>(Colors.black), // Màu chữ
+                  overlayColor: WidgetStateProperty.all<Color>(Colors.blue[100]!
+                      .withOpacity(0.1)), // Màu hiệu ứng khi nhấn
                 ),
                 child: const Text('Create order'),
               ),
@@ -276,3 +289,5 @@ class _OrderPageState extends State<OrderPage> {
     );
   }
 }
+//tạm thời xong phần get
+//còn phần create order là call api nữa chưa xong.

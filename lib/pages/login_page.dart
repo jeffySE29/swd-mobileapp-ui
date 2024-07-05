@@ -92,59 +92,115 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Center(
-              child: Text(
-                '"Quan Nhau" Restaurant',
-                style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold),
-              ),
+            const SizedBox(height: 10), // Add space above the logo
+            const Image(
+              image: AssetImage(
+                  'lib/images/logo.jpg'), // Đường dẫn có thể cần điều chỉnh
+              width: 200, // Đặt kích thước lớn hơn 2 lần so với ban đầu
+              height: 200,
             ),
-            const SizedBox(height: 30),
-            TextField(
-              controller: usernameController,
-              decoration: const InputDecoration(
-                  hintText: 'Username', border: OutlineInputBorder()),
-            ),
+
             const SizedBox(height: 20),
-            TextField(
-              controller: passwordController,
-              obscureText: _obscureText,
-              decoration: InputDecoration(
-                hintText: 'Password',
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscureText ? Icons.visibility : Icons.visibility_off,
-                  ),
-                  onPressed: _togglePasswordVisibility,
-                ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(15),
               ),
-            ),
-            const SizedBox(height: 20),
-            GestureDetector(
-              onTap: () {
-                if (usernameController.text.toString().isEmpty) {
-                  _showErrorMessage("User name is required");
-                } else if (passwordController.text.toString().isEmpty) {
-                  _showErrorMessage("Password is required");
-                } else {
-                  login(usernameController.text, passwordController.text);
-                }
-              },
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
+                  const SizedBox(height: 20),
+                  const Center(
+                    child: Text(
+                      'Login to order!',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: usernameController,
+                    decoration: InputDecoration(
+                      hintText: 'Username',
+                      border: InputBorder.none,
+                      fillColor: Colors.white, // Set background color
+                      filled: true, // Enable filling
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 15.0,
+                        horizontal: 20.0,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: const BorderSide(
+                          color: Colors.transparent,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: const BorderSide(
+                          color: Colors.transparent,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: passwordController,
+                    obscureText: _obscureText,
+                    decoration: InputDecoration(
+                      hintText: 'Password',
+                      border: InputBorder.none,
+                      fillColor: Colors.white, // Set background color
+                      filled: true, // Enable filling
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 15.0,
+                        horizontal: 20.0,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: const BorderSide(
+                          color: Colors.transparent,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: const BorderSide(
+                          color: Colors.transparent,
+                        ),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureText
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: _togglePasswordVisibility,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () {
+                      if (usernameController.text.toString().isEmpty) {
+                        _showErrorMessage("User name is required");
+                      } else if (passwordController.text.toString().isEmpty) {
+                        _showErrorMessage("Password is required");
+                      } else {
+                        login(usernameController.text, passwordController.text);
+                      }
+                    },
                     child: Container(
                       height: 60,
                       decoration: BoxDecoration(
-                        color: Colors.teal[100],
+                        color: Colors.teal[200],
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Center(
@@ -153,11 +209,14 @@ class _LoginPageState extends State<LoginPage> {
                             : const Text(
                                 'Login',
                                 style: TextStyle(
-                                    color: Colors.black, fontSize: 18),
+                                  color: Colors.black,
+                                  fontSize: 18,
+                                ),
                               ),
                       ),
                     ),
                   ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),

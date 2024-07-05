@@ -40,19 +40,19 @@ class _HomePageState extends State<HomePage> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.list_alt),
-            label: '',
+            label: 'Order',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.blinds_closed_outlined),
-            label: '',
+            label: 'History',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.notifications),
-            label: '',
+            label: 'Notification',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: '',
+            label: 'Profile',
           ),
         ],
         selectedItemColor: Colors.blue,

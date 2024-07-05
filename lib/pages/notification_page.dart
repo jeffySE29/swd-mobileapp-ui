@@ -37,7 +37,7 @@ class _NotificationPageState extends State<NotificationPage> {
       _handleIncomingNotification(message);
     });
 
-    // Tải thông báo từ file và server
+    // Tải thông báo từ file
     _loadNotifications();
   }
 
@@ -49,7 +49,6 @@ class _NotificationPageState extends State<NotificationPage> {
 
   Future<void> _loadNotifications() async {
     await _loadNotificationsFromFile();
-    await _fetchNotificationsFromServer();
     setState(() {
       _isLoading = false;
     });
@@ -75,14 +74,16 @@ class _NotificationPageState extends State<NotificationPage> {
 
   Future<void> sendTokenToServer(String token) async {
     final url = Uri.parse(
-        'https://quannhauserver.xyz/api/notifications/save-fcm-token');
-    final body = jsonEncode({'fcmToken': token, 'userId': widget.user.id});
+        'https://quannhauserver.xyz/api/notifications/save-fcm-token/');
+    final body = jsonEncode({'userId': widget.user.id, 'fcmToken': token});
 
     try {
-      final response = await http.post(url, body: body);
+      final response = await http.post(url, body: body, headers: {
+        'Content-Type': 'application/json',
+      });
 
       if (response.statusCode == 200) {
-        // print('FCM token sent successfully');
+        print('FCM token sent successfully: user id: ${widget.user.id}');
       } else {
         print('Failed to send FCM token. Status code: ${response.statusCode}');
         throw Exception('Failed to send FCM token');
@@ -124,7 +125,7 @@ class _NotificationPageState extends State<NotificationPage> {
       // Lưu lại thông báo vào tệp
       await _saveNotificationsToFile();
     } catch (e) {
-      print("Errorr: $e");
+      print("Error: $e");
     }
   }
 
@@ -171,35 +172,6 @@ class _NotificationPageState extends State<NotificationPage> {
       }
     } catch (e) {
       print("Error in notification page: $e");
-    }
-  }
-
-  Future<void> _fetchNotificationsFromServer() async {
-    // URL lấy thông báo từ server (thay đổi URL cho phù hợp với server của bạn)
-    try {
-      final url = Uri.parse(
-          'https://quannhauserver.xyz/api/notifications/get-notifications');
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        try {
-          final jsonNotifications = jsonDecode(response.body) as List<dynamic>;
-          setState(() {
-            _notifications = jsonNotifications
-                .map((json) => NotificationItem.fromJson(json))
-                .toList();
-            _filteredNotifications = List.from(_notifications);
-          });
-          // Lưu thông báo vào file sau khi tải từ server
-          await _saveNotificationsToFile();
-        } catch (e) {
-          print('Error parsing notifications from server: $e');
-        }
-      } else {
-        print('Failed to load notifications from server');
-      }
-    } catch (e) {
-      print("Error when fetch noti from server: $e");
     }
   }
 
