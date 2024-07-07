@@ -48,7 +48,7 @@ class User {
           final response = await http.get(
             Uri.parse('https://quannhauserver.xyz/api/users/avatar/$id'),
             headers: {
-              'Authorization': '$newToken',
+              'Authorization': newToken,
             },
           );
           if (response.statusCode == 200) {
@@ -69,7 +69,7 @@ class User {
         final response = await http.get(
           Uri.parse('https://quannhauserver.xyz/api/users/avatar/$id'),
           headers: {
-            'Authorization': '$token',
+            'Authorization': token,
           },
         );
         if (response.statusCode == 200) {
@@ -105,7 +105,7 @@ class User {
           final response = await http.post(
             Uri.parse('https://quannhauserver.xyz/api/auth/logout'),
             headers: {
-              'Authorization': '$newToken',
+              'Authorization': newToken,
             },
           );
           if (response.statusCode == 200) {
@@ -120,7 +120,7 @@ class User {
         final response = await http.post(
           Uri.parse('https://quannhauserver.xyz/api/auth/logout'),
           headers: {
-            'Authorization': '$token',
+            'Authorization': token,
           },
         );
         if (response.statusCode == 200) {

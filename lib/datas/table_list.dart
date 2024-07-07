@@ -1,9 +1,6 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:another_flushbar/flushbar.dart';
 import 'package:http/http.dart' as http;
 import '../datas/auth_service.dart';
-import '../datas/table_list.dart';
 
 class TableModel {
   final String id;
@@ -75,7 +72,7 @@ class AreaTable {
           final response = await http.get(
             Uri.parse(baseUrl),
             headers: {
-              'Authorization': '$newToken',
+              'Authorization': newToken,
             },
           );
           if (response.statusCode == 200) {
@@ -94,7 +91,7 @@ class AreaTable {
         final response = await http.get(
           Uri.parse(baseUrl),
           headers: {
-            'Authorization': '$token',
+            'Authorization': token,
           },
         );
         if (response.statusCode == 200) {

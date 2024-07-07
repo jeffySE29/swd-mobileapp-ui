@@ -44,7 +44,7 @@ class _HomePageState extends State<HomePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.blinds_closed_outlined),
-            label: 'History',
+            label: 'Order List',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.notifications),
@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
             label: 'Profile',
           ),
         ],
-        selectedItemColor: Colors.blue,
+        selectedItemColor: Colors.teal[200],
         unselectedItemColor: Colors.grey,
         backgroundColor: Colors.white,
         type: BottomNavigationBarType.fixed,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../datas/menu_data.dart'; // Import lớp FoodItem và fetchFoodItems
+import '../datas/menu_data.dart'; // Import lớp Category và fetchMenu từ menu_data.dart
 
 class MenuPage extends StatefulWidget {
   const MenuPage({super.key});
@@ -9,49 +9,56 @@ class MenuPage extends StatefulWidget {
 }
 
 class _MenuPageState extends State<MenuPage> {
-  List<FoodItem> _foodItems = [];
-  List<FoodItem> _filteredFoodItems = [];
+  List<Category> _categories = [];
+  List<Product> _filteredProducts = [];
   final TextEditingController _searchController = TextEditingController();
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(_filterFoodItems);
-    _fetchFoodItems();
+    _searchController.addListener(_filterProducts);
+    _fetchMenu(); // Gọi hàm _fetchMenu() trong initState để fetch dữ liệu ban đầu
   }
 
-  void _fetchFoodItems() async {
+  void _fetchMenu() async {
     try {
-      List<FoodItem> foodItems = await fetchFoodItems();
+      Menu menu = Menu();
+      List<Category> categories =
+          await menu.fetchMenu(); // Gọi fetchMenu() từ menu_data.dart
+      List<Product> products = [];
+
+      // Lấy tất cả các sản phẩm từ các danh mục
+      categories.forEach((category) {
+        products.addAll(category.products);
+      });
+
       setState(() {
-        _foodItems = foodItems;
-        _filteredFoodItems = foodItems;
+        _categories = categories;
+        _filteredProducts = products;
         _isLoading = false;
       });
     } catch (e) {
+      print('Error fetching menu: $e');
       setState(() {
-        _foodItems = sampleFoodItems;
-        _filteredFoodItems = sampleFoodItems;
         _isLoading = false;
       });
     }
   }
 
-  void _filterFoodItems() {
+  void _filterProducts() {
     final query = _searchController.text.toLowerCase();
     setState(() {
-      _filteredFoodItems = _foodItems.where((foodItem) {
-        return foodItem.name.toLowerCase().contains(query);
-      }).toList();
+      _filteredProducts = _categories
+          .expand((category) => category.products)
+          .where((product) => product.productName.toLowerCase().contains(query))
+          .toList();
     });
   }
 
-  void _filterByCategory(String category) {
+  void _filterByCategory(Category category) {
     setState(() {
-      _filteredFoodItems = _foodItems.where((foodItem) {
-        return foodItem.category == category;
-      }).toList();
+      _filteredProducts = category.products;
     });
   }
 
@@ -66,11 +73,27 @@ class _MenuPageState extends State<MenuPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.blue[100],
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFFaa4b6b),
+                Color(0xFF6b6b83),
+                Color(0xFF3b8d99),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         title: const Center(
           child: Text(
-            "Menu page",
+            "Menu",
             textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
         ),
       ),
@@ -89,20 +112,18 @@ class _MenuPageState extends State<MenuPage> {
               ),
             ),
             const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildCategoryButton(Icons.air_outlined, 'Steam'),
-                _buildCategoryButton(Icons.fireplace_sharp, 'Grill'),
-                _buildCategoryButton(Icons.hot_tub, 'Hotpot'),
-                _buildCategoryButton(Icons.add_business_sharp, 'Salad'),
-              ],
+            Wrap(
+              spacing: 8.0,
+              runSpacing: 8.0,
+              children: _categories
+                  .map((category) => _buildCategoryButton(category))
+                  .toList(),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
             Expanded(
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : _filteredFoodItems.isEmpty
+                  : _filteredProducts.isEmpty
                       ? const Center(child: Text('No food items found'))
                       : GridView.builder(
                           gridDelegate:
@@ -112,41 +133,76 @@ class _MenuPageState extends State<MenuPage> {
                             crossAxisSpacing: 10,
                             mainAxisSpacing: 10,
                           ),
-                          itemCount: _filteredFoodItems.length,
+                          itemCount: _filteredProducts.length,
                           itemBuilder: (context, index) {
-                            final foodItem = _filteredFoodItems[index];
-                            return _buildFoodItem(foodItem);
+                            final product = _filteredProducts[index];
+                            return _buildProductItem(product);
                           },
                         ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pop(context); // Back to HomePage
-        },
-        child: const Icon(Icons.home),
-        backgroundColor: Colors.blue[100],
+      floatingActionButton: Stack(
+        children: [
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: FloatingActionButton(
+              onPressed: () {
+                Navigator.pop(context); // Back to HomePage
+              },
+              backgroundColor: Colors.blue[100],
+              child: const Icon(Icons.home),
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: ElevatedButton(
+              onPressed: () {
+                // Logic for save action
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Save success'),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.black,
+                backgroundColor: Colors.blue[100], // Nền màu xanh nhạt
+              ),
+              child: const Text('Save'),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildCategoryButton(IconData icon, String category) {
-    return IconButton(
-      onPressed: () {
-        _filterByCategory(category);
-      },
-      icon: Icon(icon),
-      tooltip: category,
+  Widget _buildCategoryButton(Category category) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width / 3 -
+          16, // Adjust the width based on screen size
+      child: ElevatedButton(
+        onPressed: () {
+          _filterByCategory(category);
+        },
+        style: ElevatedButton.styleFrom(
+          foregroundColor: Colors.black,
+          backgroundColor: Colors.amber[200], // Text color
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
+        child: Text(category.categoryName),
+      ),
     );
   }
 
-  Widget _buildFoodItem(FoodItem foodItem) {
+  Widget _buildProductItem(Product product) {
     return Container(
       padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.blue[50],
         borderRadius: BorderRadius.circular(8.0),
         boxShadow: [
           BoxShadow(
@@ -161,41 +217,89 @@ class _MenuPageState extends State<MenuPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Image.network(
-              foodItem.imageUrl,
-              fit: BoxFit.cover,
-              width: double.infinity,
+            child: Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black, width: 0.1),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Container(
+                      color: Colors
+                          .white, // Đặt màu nền của ảnh trong border là trắng
+                      child: Image.network(
+                        product.imageUrl,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: 110,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 1.0),
+              ],
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 1.0),
           Text(
-            foodItem.name,
+            product.productName,
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            '${foodItem.price} VND',
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
+          Row(
+            children: [
+              const Text('Price: ',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  )),
+              const SizedBox(width: 8),
+              Text('${product.price} VND',
+                  style: const TextStyle(color: Colors.black))
+            ],
           ),
           const SizedBox(height: 4),
-          ElevatedButton(
-            onPressed: () {
-              // Add food item to order logic
-            },
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Add food item to order logic
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal[200], // Background color
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    padding: const EdgeInsets.all(8.0),
+                    minimumSize: const Size(double.infinity, 36),
+                  ),
+                  child: const Icon(Icons.add, color: Colors.black),
+                ),
               ),
-              padding: const EdgeInsets.all(8.0),
-              minimumSize: Size(double.infinity, 36),
-            ),
-            child: const Icon(Icons.add),
+              const SizedBox(width: 4),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Add food item to order logic
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal[200], // Background color
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    padding: const EdgeInsets.all(8.0),
+                    minimumSize: const Size(double.infinity, 36),
+                  ),
+                  child: const Icon(Icons.remove, color: Colors.black),
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -3,7 +3,7 @@ import '../datas/table_list.dart';
 import 'package:another_flushbar/flushbar.dart';
 
 class OrderPage extends StatefulWidget {
-  const OrderPage({Key? key}) : super(key: key);
+  const OrderPage({super.key});
 
   @override
   State<OrderPage> createState() => _OrderPageState();
@@ -11,7 +11,6 @@ class OrderPage extends StatefulWidget {
 
 class _OrderPageState extends State<OrderPage> {
   final TextEditingController _phoneController = TextEditingController();
-  int _amountPeople = 1;
 
   int? _selectedTable;
   String? _selectedArea;
@@ -50,9 +49,7 @@ class _OrderPageState extends State<OrderPage> {
 
   void _createOrder() async {
     try {
-      if (_selectedTable != null &&
-          _selectedArea != null &&
-          _amountPeople > 0) {
+      if (_selectedTable != null && _selectedArea != null) {
         Flushbar(
           message: "Order created successfully!",
           backgroundColor: const Color.fromARGB(255, 112, 217, 119),
@@ -75,12 +72,30 @@ class _OrderPageState extends State<OrderPage> {
   }
 
   Widget _buildAreaSection() {
+    int availableAreaCount = _areas
+        .where(
+            (area) => area.tables.any((table) => table.status == 'available'))
+        .length;
+    int totalAreaCount = _areas.length;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Area',
-          style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+        RichText(
+          text: TextSpan(
+            style: const TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.black),
+            children: [
+              const TextSpan(text: 'Area - '),
+              TextSpan(
+                text:
+                    '$availableAreaCount available area / $totalAreaCount Total',
+                style: const TextStyle(color: Colors.black),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 8.0),
         GridView.builder(
@@ -104,12 +119,17 @@ class _OrderPageState extends State<OrderPage> {
                   borderRadius: BorderRadius.circular(8.0),
                   color: _selectedArea == _areas[index].name
                       ? Colors.grey[300] // Selected color
-                      : Colors.teal[100], // Default color
+                      : Colors.teal[300], // Default color
                 ),
                 padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  _areas[index].name,
-                  textAlign: TextAlign.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _areas[index].name,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
             );
@@ -120,13 +140,28 @@ class _OrderPageState extends State<OrderPage> {
   }
 
   Widget _buildTableSection() {
+    int availableCount =
+        _tables.where((table) => table.status == 'available').length;
+    int totalCount = _tables.length;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16.0),
-        const Text(
-          'Table',
-          style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+        RichText(
+          text: TextSpan(
+            style: const TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.black),
+            children: [
+              const TextSpan(text: 'Table - '),
+              TextSpan(
+                text: '$availableCount available table / $totalCount Total',
+                style: const TextStyle(color: Colors.black),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 8.0),
         GridView.builder(
@@ -155,63 +190,22 @@ class _OrderPageState extends State<OrderPage> {
                   color: _selectedTable == index + 1
                       ? Colors.grey[300] // Selected color
                       : _tables[index].status == 'available'
-                          ? Colors.teal[100] // Available color
-                          : Colors.yellow[100], // Not available color
+                          ? Colors.teal[300] // Available color
+                          : Colors.amber[200], // Not available color
                 ),
                 padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  _tables[index].code, // Displaying code on the table button
-                  textAlign: TextAlign.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _tables[index].name,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
             );
           },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAmountSection() {
-    return Column(
-      children: [
-        const Divider(),
-        const SizedBox(height: 16.0),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Amount People',
-              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-            ),
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      if (_amountPeople > 1) {
-                        _amountPeople--;
-                      }
-                    });
-                  },
-                  icon: const Icon(Icons.remove_circle_outline),
-                ),
-                const SizedBox(width: 5),
-                Text(
-                  _amountPeople.toString(),
-                  style: const TextStyle(fontSize: 18.0),
-                ),
-                const SizedBox(width: 5),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _amountPeople++;
-                    });
-                  },
-                  icon: const Icon(Icons.add_circle_outline),
-                ),
-              ],
-            ),
-          ],
         ),
       ],
     );
@@ -225,16 +219,32 @@ class _OrderPageState extends State<OrderPage> {
 
   @override
   Widget build(BuildContext context) {
-    bool _isButtonEnabled = _selectedTable != null && _selectedArea != null;
+    bool isButtonEnabled = _selectedTable != null && _selectedArea != null;
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.blue[100],
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFFaa4b6b),
+                Color(0xFF6b6b83),
+                Color(0xFF3b8d99),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         title: const Center(
           child: Text(
-            "Order page",
+            "Order",
             textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
         ),
       ),
@@ -247,40 +257,75 @@ class _OrderPageState extends State<OrderPage> {
             const SizedBox(height: 16.0),
             _buildTableSection(),
             const SizedBox(height: 16.0),
-            _buildAmountSection(),
-            const SizedBox(height: 16.0),
             const Divider(),
             const SizedBox(height: 16.0),
-            Text(
-              'Area: ${_selectedArea ?? "None"}',
-              style: const TextStyle(fontSize: 16.0),
-            ),
-            const SizedBox(height: 8.0),
-            Text(
-              'Table: ${_selectedTable != null ? _tables[_selectedTable! - 1].code : "None"}',
-              style: const TextStyle(fontSize: 16.0),
-            ),
-            const SizedBox(height: 8.0),
-            Text(
-              'Amount: $_amountPeople people',
-              style: const TextStyle(fontSize: 16.0),
-            ),
-            const SizedBox(height: 16.0),
-            Center(
-              child: ElevatedButton(
-                onPressed: _isButtonEnabled ? _createOrder : null,
-                style: ButtonStyle(
-                  minimumSize: WidgetStateProperty.all<Size>(
-                    const Size(250, 50),
-                  ), // Set the minimum width and height of the button
-                  backgroundColor: WidgetStateProperty.all<Color>(
-                      Colors.teal[100]!), // Màu nền
-                  foregroundColor:
-                      WidgetStateProperty.all<Color>(Colors.black), // Màu chữ
-                  overlayColor: WidgetStateProperty.all<Color>(Colors.blue[100]!
-                      .withOpacity(0.1)), // Màu hiệu ứng khi nhấn
+            Row(
+              children: [
+                const Text(
+                  'Area:',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                child: const Text('Create order'),
+                const SizedBox(width: 8),
+                Text(
+                  _selectedArea ?? "None",
+                  style: const TextStyle(
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8.0),
+            Row(
+              children: [
+                const Text(
+                  'Table:',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  _selectedTable != null
+                      ? _tables[_selectedTable! - 1].name
+                      : "None",
+                  style: const TextStyle(
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8.0),
+            const SizedBox(height: 60.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: isButtonEnabled ? _createOrder : null,
+                  style: ButtonStyle(
+                    minimumSize: WidgetStateProperty.all<Size>(
+                      const Size(250, 50),
+                    ), // Set the minimum width and height of the button
+                    backgroundColor: WidgetStateProperty.all<Color>(
+                        Colors.teal[300]!), // Màu nền
+                    foregroundColor:
+                        WidgetStateProperty.all<Color>(Colors.black), // Màu chữ
+                    overlayColor: WidgetStateProperty.all<Color>(Colors
+                        .blue[100]!
+                        .withOpacity(0.1)), // Màu hiệu ứng khi nhấn
+                  ),
+                  child: const Text(
+                    'Create order',
+                    style: TextStyle(
+                      fontSize: 15.0, // Increase font size
+                      fontWeight: FontWeight.bold, // Make text bold
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -289,5 +334,3 @@ class _OrderPageState extends State<OrderPage> {
     );
   }
 }
-//tạm thời xong phần get
-//còn phần create order là call api nữa chưa xong.

@@ -47,11 +47,27 @@ class ProfilePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.blue[100],
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFFaa4b6b),
+                Color(0xFF6b6b83),
+                Color(0xFF3b8d99),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         title: const Center(
           child: Text(
-            "Profile page",
+            "Profile",
             textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
         ),
       ),
@@ -107,7 +123,7 @@ class ProfilePage extends StatelessWidget {
                   const Size(250, 50),
                 ), // Set the minimum width and height of the button
                 backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.teal[100]!), // Màu nền
+                    Colors.teal[300]!), // Màu nền
                 foregroundColor:
                     WidgetStateProperty.all<Color>(Colors.black), // Màu chữ
                 overlayColor: WidgetStateProperty.all<Color>(Colors.blue[100]!
