@@ -2,10 +2,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../datas/auth_service.dart';
 
+// const String domain = "http://localhost:3333";
+const String domain = "https://quannhauserver.xyz";
+
 class Order {
   final String id;
   final String code;
   final String tableId;
+  final String areaName;
   final String customerId;
   final String status;
   final String tableName;
@@ -15,6 +19,7 @@ class Order {
     required this.id,
     required this.code,
     required this.tableId,
+    required this.areaName,
     required this.customerId,
     required this.status,
     required this.tableName,
@@ -27,6 +32,7 @@ class Order {
       id: json['id'] ?? '',
       code: json['code'] ?? '',
       tableId: json['tableId'] ?? '',
+      areaName: json['table']?['area']?['name'] ?? '',
       customerId: json['customerId'] ?? '',
       status: json['status'] ?? '',
       tableName: json['table']?['name'] ?? '',
@@ -37,8 +43,9 @@ class Order {
 }
 
 Future<List<Order>> fetchOrders() async {
-  const String apiUrl =
-      'https://quannhauserver.xyz/api/orders?page_index=1&page_size=1000';
+  //http://localhost:3333
+  //https://quannhauserver.xyz
+  const String apiUrl = '$domain/api/orders/date?page_index=1&page_size=1000';
   try {
     String? token = await AuthService.getToken();
     if (token == null) {
@@ -75,7 +82,8 @@ List<Order> _processResponse(http.Response response) {
     var jsonData = jsonDecode(response.body);
     List<dynamic> orderData = jsonData['data'] ?? [];
     if (orderData.isEmpty) {
-      throw Exception('No data for order list');
+      // throw Exception('No data for order list');
+      orderData = [];
     }
     List<Order> orders = orderData.map((json) {
       return Order.fromJson({
@@ -83,6 +91,7 @@ List<Order> _processResponse(http.Response response) {
         'customerId': json['customerId'] ?? '',
       });
     }).toList();
+    if (orders.length == 0) return [];
 
     // Lọc những order có status là "pending"
     orders = orders.where((order) => order.status == 'pending').toList();

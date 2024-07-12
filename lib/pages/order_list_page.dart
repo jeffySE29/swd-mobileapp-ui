@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import '../datas/order_data.dart';
 import 'order_detail_page.dart';
+import '../datas/user_data.dart';
 import 'package:another_flushbar/flushbar.dart';
 
 class OrderListPage extends StatefulWidget {
-  const OrderListPage({Key? key});
+  final User user;
+  const OrderListPage({super.key, required this.user});
 
   @override
+  // ignore: library_private_types_in_public_api
   _OrderListPageState createState() => _OrderListPageState();
 }
 
@@ -37,7 +40,7 @@ class _OrderListPageState extends State<OrderListPage> {
       Flushbar(
         message: "$e",
         backgroundColor: const Color.fromARGB(255, 112, 217, 119),
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 2),
       ).show(context);
     }
   }
@@ -65,16 +68,8 @@ class _OrderListPageState extends State<OrderListPage> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFFaa4b6b),
-                Color(0xFF6b6b83),
-                Color(0xFF3b8d99),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+          decoration: BoxDecoration(
+            color: Colors.green[800],
           ),
         ),
         title: const Center(
@@ -114,9 +109,9 @@ class _OrderListPageState extends State<OrderListPage> {
             const SizedBox(height: 20),
             Expanded(
               child: _isLoading
-                  ? Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator())
                   : _filteredOrders.isEmpty
-                      ? Center(child: Text('No orders found'))
+                      ? const Center(child: Text('No orders found'))
                       : ListView.builder(
                           itemCount: _filteredOrders.length,
                           itemBuilder: (context, index) {
@@ -133,6 +128,11 @@ class _OrderListPageState extends State<OrderListPage> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => OrderDetailPage(
+                                      pageIndex: 1,
+                                      user: widget.user,
+                                      areaName: order.areaName,
+                                      tableId: order.tableId,
+                                      tableName: order.tableName,
                                       orderId: order.id,
                                     ),
                                   ),

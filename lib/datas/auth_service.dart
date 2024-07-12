@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+// const String domain = "http://localhost:3333";
+const String domain = "https://quannhauserver.xyz";
+
 class AuthService {
   // Function to save token and expiresAt to SharedPreferences
   static Future<void> saveToken(
@@ -38,8 +41,10 @@ class AuthService {
       if (refreshToken == null || refreshToken.isEmpty) {
         return "Refresh failed";
       }
+      //http://localhost:3333
+      //https://quannhauserver.xyz
       var response = await http.post(
-        Uri.parse('https://quannhauserver.xyz/api/auth/refreshToken'),
+        Uri.parse('$domain/api/auth/refreshToken'),
         body: {'refreshToken': refreshToken},
       );
       if (response.statusCode == 200) {

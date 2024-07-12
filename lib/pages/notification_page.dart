@@ -23,11 +23,15 @@ class _NotificationPageState extends State<NotificationPage> {
   List<NotificationItem> _filteredNotifications = [];
   final TextEditingController _searchController = TextEditingController();
   bool _isLoading = true;
+  //  String domain = "http://localhost:3333";
+  String domain = "https://quannhauserver.xyz";
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_filterNotifications);
+
+    requestNotificationPermission(); // Yêu cầu quyền thông báo
 
     // Lấy FCM token khi khởi động trang
     _retrieveAndSendFCMToken();
@@ -39,6 +43,27 @@ class _NotificationPageState extends State<NotificationPage> {
 
     // Tải thông báo từ file
     _loadNotifications();
+  }
+
+  // Hàm yêu cầu quyền thông báo từ người dùng
+  Future<void> requestNotificationPermission() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('User granted permission for notifications');
+    } else {
+      print('User declined or has not accepted permission');
+    }
   }
 
   @override
@@ -72,9 +97,10 @@ class _NotificationPageState extends State<NotificationPage> {
     }
   }
 
+  //local //http://localhost:3333
+  //deploy //https://quannhauserver.xyz
   Future<void> sendTokenToServer(String token) async {
-    final url = Uri.parse(
-        'https://quannhauserver.xyz/api/notifications/save-fcm-token/');
+    final url = Uri.parse('$domain/api/notifications/save-fcm-token/');
     final body = jsonEncode({'userId': widget.user.id, 'fcmToken': token});
 
     try {
@@ -132,23 +158,17 @@ class _NotificationPageState extends State<NotificationPage> {
   Future<void> _saveNotificationsToFile() async {
     try {
       final directory = await getApplicationDocumentsDirectory();
-      print("dir   $directory");
       final file = File('${directory.path}/notifications.json');
-      print("file:  $file");
-      try {
-        // Chuyển đổi danh sách _notifications thành danh sách JSON
-        final jsonNotifications = _notifications
-            .map((notification) => notification.toJson())
-            .toList();
 
-        // Ghi dữ liệu vào tệp
-        await file.writeAsString(jsonEncode(jsonNotifications));
-        print('Notifications saved to file');
-      } catch (e) {
-        print('Error saving notifications: $e');
-      }
+      // Chuyển đổi danh sách _notifications thành danh sách JSON
+      final jsonNotifications =
+          _notifications.map((notification) => notification.toJson()).toList();
+
+      // Ghi dữ liệu vào tệp
+      await file.writeAsString(jsonEncode(jsonNotifications));
+      print('Notifications saved to file');
     } catch (e) {
-      print("Error when save noti to file: $e");
+      print('Error saving notifications: $e');
     }
   }
 
@@ -157,18 +177,14 @@ class _NotificationPageState extends State<NotificationPage> {
       final directory = await getApplicationDocumentsDirectory();
       final file = File('${directory.path}/notifications.json');
       if (await file.exists()) {
-        try {
-          final contents = await file.readAsString();
-          final jsonNotifications = jsonDecode(contents) as List<dynamic>;
-          setState(() {
-            _notifications = jsonNotifications
-                .map((json) => NotificationItem.fromJson(json))
-                .toList();
-            _filteredNotifications = List.from(_notifications);
-          });
-        } catch (e) {
-          print('Error loading notifications from file: $e');
-        }
+        final contents = await file.readAsString();
+        final jsonNotifications = jsonDecode(contents) as List<dynamic>;
+        setState(() {
+          _notifications = jsonNotifications
+              .map((json) => NotificationItem.fromJson(json))
+              .toList();
+          _filteredNotifications = List.from(_notifications);
+        });
       }
     } catch (e) {
       print("Error in notification page: $e");
@@ -183,16 +199,8 @@ class _NotificationPageState extends State<NotificationPage> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFFaa4b6b),
-                Color(0xFF6b6b83),
-                Color(0xFF3b8d99),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+          decoration: BoxDecoration(
+            color: Colors.green[800],
           ),
         ),
         title: const Center(

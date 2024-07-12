@@ -7,8 +7,9 @@ import '../datas/user_data.dart';
 
 class HomePage extends StatefulWidget {
   final User user; // User data
+  final int initialTabIndex; // Tab index to select initially
 
-  const HomePage({Key? key, required this.user}) : super(key: key);
+  const HomePage({super.key, required this.user, this.initialTabIndex = 0});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -16,6 +17,12 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialTabIndex;
+  }
 
   void _navigateBottomBar(int index) {
     setState(() {
@@ -26,8 +33,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> _pages = [
-      const OrderPage(),
-      const OrderListPage(),
+      OrderPage(user: widget.user),
+      OrderListPage(user: widget.user),
       NotificationPage(user: widget.user),
       ProfilePage(user: widget.user), // Pass user data to ProfilePage
     ];
@@ -55,7 +62,7 @@ class _HomePageState extends State<HomePage> {
             label: 'Profile',
           ),
         ],
-        selectedItemColor: Colors.teal[200],
+        selectedItemColor: Colors.green[800],
         unselectedItemColor: Colors.grey,
         backgroundColor: Colors.white,
         type: BottomNavigationBarType.fixed,

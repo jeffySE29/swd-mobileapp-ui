@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'auth_service.dart';
 
+// const String domain = "http://localhost:3333";
+const String domain = "https://quannhauserver.xyz";
+
 class User {
   final String id;
   final String email;
@@ -35,6 +38,10 @@ class User {
     );
   }
 
+  String getCurrentUserId() {
+    return id;
+  }
+
   Future<void> getAvatar() async {
     try {
       String? token = await AuthService.getToken();
@@ -45,8 +52,10 @@ class User {
             newToken == "Refresh failed") {
           throw Exception("Error when get avatar");
         } else {
+          //http://localhost:3333
+          //https://quannhauserver.xyz
           final response = await http.get(
-            Uri.parse('https://quannhauserver.xyz/api/users/avatar/$id'),
+            Uri.parse('$domain/api/users/avatar/$id'),
             headers: {
               'Authorization': newToken,
             },
@@ -67,7 +76,9 @@ class User {
         }
       } else {
         final response = await http.get(
-          Uri.parse('https://quannhauserver.xyz/api/users/avatar/$id'),
+          //http://localhost:3333
+          //https://quannhauserver.xyz
+          Uri.parse('$domain/api/users/avatar/$id'),
           headers: {
             'Authorization': token,
           },
@@ -102,8 +113,10 @@ class User {
             newToken == "Refresh failed") {
           return "success";
         } else {
+          //http://localhost:3333
+          //https://quannhauserver.xyz
           final response = await http.post(
-            Uri.parse('https://quannhauserver.xyz/api/auth/logout'),
+            Uri.parse('$domain/api/auth/logout'),
             headers: {
               'Authorization': newToken,
             },
@@ -118,7 +131,9 @@ class User {
         }
       } else {
         final response = await http.post(
-          Uri.parse('https://quannhauserver.xyz/api/auth/logout'),
+          //http://localhost:3333
+          //https://quannhauserver.xyz
+          Uri.parse('$domain/api/auth/logout'),
           headers: {
             'Authorization': token,
           },

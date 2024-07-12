@@ -6,7 +6,7 @@ import 'login_page.dart';
 class ProfilePage extends StatelessWidget {
   final User user; // User data
 
-  const ProfilePage({Key? key, required this.user}) : super(key: key);
+  const ProfilePage({super.key, required this.user});
 
   // Function to call API for logout
   Future<void> logout(BuildContext context) async {
@@ -26,17 +26,16 @@ class ProfilePage extends StatelessWidget {
         Flushbar(
           message: 'Logout failed. Please try again.',
           backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 2),
           flushbarPosition: FlushbarPosition.TOP,
         ).show(context);
       }
     } catch (e) {
       // Handle API call errors
-      print(e);
       Flushbar(
         message: 'An error occurred. Please try again later. $e',
         backgroundColor: Colors.red,
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 2),
         flushbarPosition: FlushbarPosition.TOP,
       ).show(context);
     }
@@ -48,16 +47,8 @@ class ProfilePage extends StatelessWidget {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFFaa4b6b),
-                Color(0xFF6b6b83),
-                Color(0xFF3b8d99),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+          decoration: BoxDecoration(
+            color: Colors.green[800],
           ),
         ),
         title: const Center(
@@ -123,13 +114,18 @@ class ProfilePage extends StatelessWidget {
                   const Size(250, 50),
                 ), // Set the minimum width and height of the button
                 backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.teal[300]!), // Màu nền
+                    Colors.green[800]!), // Màu nền
                 foregroundColor:
                     WidgetStateProperty.all<Color>(Colors.black), // Màu chữ
                 overlayColor: WidgetStateProperty.all<Color>(Colors.blue[100]!
                     .withOpacity(0.1)), // Màu hiệu ứng khi nhấn
               ),
-              child: const Text('Logout'),
+              child: const Text(
+                'Logout',
+                style: TextStyle(
+                  color: Colors.white, // Change the text color to black
+                ),
+              ),
             ),
           ],
         ),
