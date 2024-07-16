@@ -146,8 +146,8 @@ class _MenuPageState extends State<MenuPage> {
                                         CrossAxisAlignment.center,
                                     children: [
                                       Container(
-                                        width: 30,
-                                        height: 30,
+                                        width: 35,
+                                        height: 35,
                                         decoration: BoxDecoration(
                                           color: Colors.white,
                                           borderRadius:
@@ -161,6 +161,7 @@ class _MenuPageState extends State<MenuPage> {
                                       ),
                                       const SizedBox(width: 10),
                                       Container(
+                                        alignment: Alignment.bottomLeft,
                                         width:
                                             55, // Set độ rộng cố định cho productName
                                         child: Text(
@@ -174,6 +175,7 @@ class _MenuPageState extends State<MenuPage> {
                                       ),
                                       const SizedBox(width: 11),
                                       Container(
+                                        alignment: Alignment.centerLeft,
                                         width: 35,
                                         child: TextField(
                                           onChanged: (text) {
@@ -185,12 +187,12 @@ class _MenuPageState extends State<MenuPage> {
                                             hintText: 'Note',
                                             hintStyle: TextStyle(
                                                 overflow: TextOverflow.ellipsis,
-                                                fontSize: 7),
+                                                fontSize: 8),
                                             border: InputBorder.none,
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(width: 5),
+                                      const SizedBox(width: 2),
                                       IconButton(
                                         icon: const Icon(
                                           Icons.remove_circle_outline,
@@ -255,8 +257,7 @@ class _MenuPageState extends State<MenuPage> {
                     child: const Text('Close'),
                   ),
                   const SizedBox(
-                    width: 2,
-                    height: 5,
+                    width: 1,
                   ),
                   ElevatedButton(
                     onPressed: _cartItems.isEmpty
@@ -288,15 +289,18 @@ class _MenuPageState extends State<MenuPage> {
                   ),
                 ],
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(7.0),
                 ),
-                contentPadding: const EdgeInsets.all(16.0),
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                buttonPadding: const EdgeInsets.symmetric(horizontal: 8.0),
+                // contentPadding: const EdgeInsets.all(16.0),
+                // actionsPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                // buttonPadding: const EdgeInsets.symmetric(horizontal: 8.0),
               );
             },
           );
         },
+      );
+      SizedBox(
+        height: 2,
       );
     } catch (e) {
       Flushbar(
@@ -533,7 +537,7 @@ class _MenuPageState extends State<MenuPage> {
         child: Text(
           category.categoryName,
           style: const TextStyle(
-              fontSize: 9,
+              fontSize: 12,
               fontWeight: FontWeight.bold,
               overflow: TextOverflow.ellipsis),
         ),
@@ -576,8 +580,8 @@ class _MenuPageState extends State<MenuPage> {
                         color: Colors.white,
                         child: Image.network(
                           product.imageUrl,
-                          width: 110,
-                          height: 70,
+                          width: double.infinity,
+                          height: 95,
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -587,11 +591,14 @@ class _MenuPageState extends State<MenuPage> {
               ],
             ),
           ),
-          Text(
-            product.productName,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+          Container(
+            width: double.infinity,
+            child: Text(
+              product.productName,
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  overflow: TextOverflow.ellipsis),
             ),
           ),
           const SizedBox(height: 4),

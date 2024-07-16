@@ -23,7 +23,7 @@ class _NotificationPageState extends State<NotificationPage> {
   List<NotificationItem> _filteredNotifications = [];
   final TextEditingController _searchController = TextEditingController();
   bool _isLoading = true;
-  //  String domain = "http://localhost:3333";
+  // String domain = "http://localhost:3333";
   String domain = "https://quannhauserver.xyz";
 
   @override
