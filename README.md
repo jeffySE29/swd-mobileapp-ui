@@ -4,13 +4,12 @@ A new Flutter project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+This is my first project about mobile app and also with flutter dart. The topic is a mobile app to manage customer's orders in restaurant.
+Design & implement UI and manipulate the data logic process is my role in this project.
 
-A few resources to get you started if this is your first Flutter project:
+We also have a server side and web front-end UI for this project. You can find it below:
+- The BE github: https://github.com/bkhang1603/swd_backend
+- The FE github: https://github.com/bkhang1603/swd_frontend
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Because this is my first one with flutter so this project still has some problems that I haven't handle yet.
